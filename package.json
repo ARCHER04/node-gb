@@ -1,0 +1,22 @@
+{
+  "name": "gb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "CommonJS",
+    "url": "git+https://github.com/ARCHER04/node-gb.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ARCHER04/node-gb/issues"
+  },
+  "homepage": "https://github.com/ARCHER04/node-gb#readme",
+  "dependencies": {
+    "colors": "^1.4.0"
+  }
+}
