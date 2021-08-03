@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ARCHER04/node-gb#readme",
   "dependencies": {
-    "colors": "^1.4.0"
+    "colors": "^1.4.0",
+    "inquirer": "^8.1.2"
   }
 }
