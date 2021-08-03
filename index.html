@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Simple</title>
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"
+        integrity="sha384-gDaozqUvc4HTgo8iZjwth73C6dDDeOJsAgpxBcMpZYztUfjHXpzrpdrHRdVp8ySO"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="active-user"></div>
+    <div id="users-count"></div>
+    <br>
+    <form name="mainform">
+        <input type="text" name="maininput" autofocus>
+        <input type="submit" name="send" value="send">
+    </form>
+    <div id="messages"></div>
+</body>
+<script>
+    let activeUser = "";
+    const activeUserElement = document.querySelector("#active-user");
+    const userCountElement = document.querySelector("#users-count");
+    const messages = document.querySelector("#messages");
+    let socketio;
+
+    const addMessage = (msg, user = "") => {
+        console.log(user, msg);
+        const msgSpan = document.createElement("div");
+        msgSpan.innerHTML = (user ? `<b>${user}</b>: ` : "") + msg;
+        messages.append(msgSpan);
+    };
+
+    const showCount = count => userCountElement.innerHTML = "Пользователей в чате: " + count;
+
+    connectToServer();
+
+    function connectToServer() {
+        activeUserElement.innerHTML = "Введите Ваше имя";
+        document.mainform.send.onclick = (e) => {
+            e.preventDefault();
+            activeUser = document.mainform.maininput.value;
+            activeUserElement.innerHTML = `Текущий пользователь: <b>${activeUser}</b>. <br>Для
+                                            выхода обновите страницу или закройте браузер`;
+            document.mainform.maininput.value = "";
+            socketio = io("localhost:3000")
+            socketio.on('connect', () => {
+                socketio.emit('CLIENT_REG', { msg: activeUser });
+                console.log('Successful connected to server: ' + activeUser);
+                socketio.on('SERVER_MSG', data => addMessage(data.msg, data.user));
+                socketio.on('NEW_CONN_EVENT', data => {
+                    addMessage(data.msg);
+                    showCount(data.count);
+                    console.log(data.count);
+                });
+                document.mainform.send.onclick = (e) => {
+                    e.preventDefault();
+                    socketio.emit('CLIENT_MSG', { user: activeUser, msg: document.mainform.maininput.value });
+                    document.mainform.maininput.value = '';
+                };
+            });
+        };
+
+    }
+
+
+
+
+
+</script>
+
+</html>
