@@ -1,45 +1,30 @@
-const colors=require("colors");
+const fs = require("fs");
+const path = require("path");
 
-let rangeMin = process.argv[2]||2;
-let rangeMax = process.argv[3]||100;
+const fileRead = "access.log";
 
-if (checkRange(rangeMin,rangeMax)){
-   let count=0, result="";
-   for (let i=rangeMin;i<=rangeMax;i++){
-        if (isSimple(i)) result+=colored(++count,i)+" ";
-    }
-    output(result);
-}
+const rs=fs.createReadStream("./access.log","utf-8");
+const ip=["89.123.1.41","34.48.240.111"];
+const ws=ip.map(item=>fs.createWriteStream(item+"_requests.log",{flags:"a",encoding:"utf-8"}));
 
-function isSimple(num){
-    for (let i=2;i<num/2+1;i++){
-        if (num%i===0) return false;
-    }
-    return true;
-}
-function colored(count,num){
-    if (count%3==1) return colors.green(num);
-    if (count%3==2) return colors.yellow(num);
-    if (count%3==0) return colors.red(num);
-}
+rs.on("error",(error)=>console.log(error));
+rs.on("data",chunk=>{
+    ws.forEach((wsItem,index)=>{
+        let find=chunk.toString().match(new RegExp(ip[index]+'\.*0\"',"g"));
+        if (find.length>0) {
+            wsItem.write(find.join("\n"));
+            wsItem.write("\n");
+        }
+    });
+});
+rs.on("end",()=>{
+    ws.forEach(item=>item.end());
+    clearInterval(message);
+    console.log("Обработка файла закончена!" );
 
-function output(result){
-    console.group(`Простые числа диапазона от ${colors.yellow(rangeMin)} до ${colors.yellow(rangeMax)}`);
-    if (result) {
-        console.log(result);
-    } else {
-        console.log(colors.red("НЕт простых чисел"));
-    }
-    console.groupEnd();
-}
-
-function checkRange(rangeMin,rangeMax){
-    if (rangeMin==1) rangeMin=2;
-    if (isNaN(rangeMin)||isNaN(rangeMax)||rangeMin>rangeMax) {
-        console.log(colors.red("Ошибка "));
-        return false;
-    }
-    return true;
-}
-
-
+});
+let i=1;
+const message=setInterval(()=>{
+    console.log("Выполняется обработка файла"+".".repeat(i++));
+    i>20?i=1:i;
+    },1000);
